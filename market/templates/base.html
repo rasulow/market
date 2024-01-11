@@ -7,7 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Market</title>
 </head>
-<body class="bg-red-100">
-    Market
+<body class="">
+    <div class="container mx-auto flex justify-center items-center space-x-4 p-5">
+        <a href="{% url 'home' %}" class="text-[25px] rounded border-[2px] border-green-400 border-solid px-3 hover:bg-green-400 hover:text-white {% if request.path == '/' %}bg-green-400 text-white{% endif %}">Home</a>
+        <a href="{% url 'category' %}" class="text-[25px] rounded border-[2px] border-green-400 border-solid px-3 hover:bg-green-400 hover:text-white {% if request.path == '/category' %}bg-green-400 text-white{% endif %}">Kategoriýalar</a>
+    </div>
+    {% block content %}
+    {% endblock %}
 </body>
 </html>
