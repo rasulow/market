@@ -1,5 +1,35 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-    Kategoriya
+    {% include 'topbar.html' %}
+        <div class="container mx-auto flex justify-center p-20 w-full space-x-3">
+            <div class="border border-gray-400 border-solid rounded w-[500px] h-[700px] p-3 overflow-auto">
+                {% for item in category %}
+                    <div class="flex justify-between items-center border-b border-gray-400 border-solid mt-2">
+                        <div class="flex">
+                            <p class="mr-2">{{ item.id }}.</p>
+                            <p class="">{{ item.name }}</p>
+                        </div>
+                        <form method="post" action="{% url 'delete-category' category_id=item.id %}">
+                            {% csrf_token %}
+                            <button type="submit">
+                                <img src="{% static 'icons/delete.png' %}" alt="" class="w-[18px] h-[18px]">
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="w-[500px] px-3">
+                <form action="{% url 'category' %}" method="post">
+                    {% csrf_token %}
+                    <div class="border border-gray-400 border-solid flex items-center p-2">
+                        <input type="text" name="category_name" class="bg-transparent focus:outline-none w-full">
+                    </div>
+                    <div class="w-full flex justify-end">
+                        <button type="submit" class="mt-4 bg-green-600 text-white font-medium py-1 px-4 rounded">Goşmak</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 {% endblock %}

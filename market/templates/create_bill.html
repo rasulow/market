@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% include 'topbar.html'   %}
+    <div class="container mx-auto h-full p-[20px] flex space-x-4">
+        <div class="border border-gray-400 border-solid rounded w-1/2 h-[800px] p-3 overflow-auto">
+            <table>
+                <tr>
+                  <th>ID</th>
+                  <th>Ady</th>
+                  <th>Bahasy</th>
+                  <th>Olcegi</th>
+                  <th>Umumy mukdary</th>
+                  <th></th>
+                </tr>
+                {% for product in products %}
+                    <tr>
+                        <td>{{ product.id }}</td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.price }} TMT</td>
+                        {% if product.unit == 'piece' %}
+                            <td>stuk</td>
+                        {% else %}
+                            <td>kg</td>
+                        {% endif %}
+                        <td>{{ product.count_in_stock }}</td>
+                        <td class="flex justify-center"><button type="button" onclick="addInput()" class="w-[25px] h-[25px] border border-green-600 border-solid text-green-600 hover:bg-green-600 hover:text-white">+</button></td>
+                    </tr>
+                {% endfor %}
+
+              </table>
+        </div>
+        <div class="w-1/2">
+            <form id="dynamicForm">
+                <div id="inputContainer">
+                    <input type="text" name="dynamicInput[]" placeholder="Enter something"><br>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid black;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+    </style>
+
+    <script>
+        function addInput() {
+            // Create a new input element
+            var newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.name = 'dynamicInput[]'; // Use [] to make it an array in the form data
+            newInput.placeholder = 'Enter something';
+
+            // Append the new input to the container
+            document.getElementById('inputContainer').appendChild(newInput);
+        }
+    </script>
+{% endblock %}
