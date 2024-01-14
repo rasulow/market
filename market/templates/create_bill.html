@@ -4,7 +4,7 @@
 {% block content %}
 {% include 'topbar.html'   %}
     <div class="container mx-auto h-full p-[20px] flex space-x-4">
-        <div class="border border-gray-400 border-solid rounded w-1/2 h-[800px] p-3 overflow-auto">
+        <div class="w-1/2 h-[800px] p-3 overflow-auto">
             <table>
                 <tr>
                   <th>ID</th>
@@ -25,10 +25,13 @@
                             <td>kg</td>
                         {% endif %}
                         <td>{{ product.count_in_stock }}</td>
-                        <td class="flex justify-center">
+                        <td class="flex justify-center space-x-1">
+                            <div class="px-1 border border-gray-400 border-solid flex justify-center items-center w-[80px]">
+                              <input id="count" type="number" step="0.01" class="w-full h-full focus:outline-none bg-transparent">
+                            </div>
                             <button 
                                 type="button" 
-                                onclick="addInput( '{{ product.id }}', '{{ product.name }}', '{{ product.price }}', '{{ product.unit }}' )" 
+                                onclick="addProduct( '{{ product.id }}', '{{ product.name }}', '{{ product.price }}', '{{ product.unit }}', '{{ product.count_in_stock }}')" 
                                 class="w-[25px] h-[25px] border border-green-600 border-solid text-green-600 hover:bg-green-600 hover:text-white"
                             >
                                 +
@@ -39,8 +42,34 @@
 
               </table>
         </div>
-        <div class="border border-gray-400 border-solid rounded w-1/3 h-[800px] px-3 overflow-auto">
-            <div id='otherLabel' class="">
+        <div class="w-1/3 h-[800px] px-3 overflow-auto">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title"><strong>Çek</strong></h4>
+                </div>
+                <div class="panel-body">
+                  <div class="table-responsive">
+                    <table class="table table-condensed">
+                      <thead>
+                        <tr>
+                          <td><strong>Haryt</strong></td>
+                          <td class="text-right"><strong>Bahasy</strong></td>
+                          <td class="text-right"><strong>Mukdary</strong></td>
+                          <td class="text-right"><strong>Umumy (TMT)</strong></td>
+                        </tr>
+                      </thead>
+                      <tbody id="summary-table-body"></tbody>
+                    </table>
+                  </div>
+                  <div class="flex justify-between mt-3">
+                    <div class="font-bold text-[20px]">Umumy bahasy:</div>
+                    <div class="font-bold text-[20px]" id="totalPrice">0 TMT</div>
+                  </div>
+                  <div class="w-full flex justify-end">
+                    <button type="submit" onclick="postBill()" class="mt-4 bg-[#658C4A] text-white font-medium py-1 px-4 rounded">Çek döretmek</button>
+                  </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -63,15 +92,101 @@
     </style>
 
     <script>
-        function addInput(id) {
-            var productInfo = 'ID:' + id
-            var existingContent = document.getElementById("otherLabel").innerHTML;
+        var bill_items = []
+        var total_price = 0.0
+        function addProduct(product_id, product_name, product_price, product_unit, count_in_stock ) {
+            
+            var tableBody = document.getElementById('summary-table-body');
+            
+            let tdElement = event.target.closest('td')
+            let inputElement = tdElement.querySelector('input')
+            var count = inputElement.value
+            if (count.trim() === "") {
+              alert("Nace mukdarda?");
+              return;
+            }
+            if (count_in_stock - parseFloat(count) < 0 ) {
+              alert("Ammarda baryndan kop mukdarda!");
+              return;
+            }
 
-            // Concatenate the new product information with the existing content
-            var newContent = existingContent + '<br>' + productInfo;
+            if (bill_items.some(item => item.id === parseInt(product_id))) {
+              alert("Çekde bu haryt bir eýýäm bar!");
+              return;
+            }
 
-            // Set the innerHTML of the otherLabel element to the updated content
-            document.getElementById("otherLabel").innerHTML = newContent;
+            
+            var tr = document.createElement('tr');
+
+            var td_name = document.createElement('td');
+            td_name.innerHTML = product_name;
+
+            var td_price = document.createElement('td');
+            td_price.setAttribute('class', 'text-right');
+            td_price.innerHTML = product_price + ' TMT';
+
+
+
+            var td_unit = document.createElement('td')
+            td_unit.setAttribute('class', 'text-right')
+            if (product_unit == 'piece') product_unit = 'stuk'
+            td_unit.innerHTML = count + ' ' + product_unit
+
+            
+            var td_total_price_of_product = document.createElement('td')
+            td_total_price_of_product.setAttribute('class', 'text-right')
+            var price = parseFloat(product_price) * parseFloat(count)
+            td_total_price_of_product.innerHTML = price
+            
+            var tPrice = document.getElementById('totalPrice')
+            total_price += price;
+
+            tPrice.innerHTML = total_price + ' TMT'
+
+            tr.appendChild(td_name);
+            tr.appendChild(td_price);
+            tr.appendChild(td_unit);
+            tr.appendChild(td_total_price_of_product);
+
+
+            tableBody.appendChild(tr);
+
+            var item = {
+              'id': parseInt(product_id),
+              'count': parseFloat(count),
+              'total_price': price 
+            }
+
+            bill_items.push(item);
+        }
+
+        function postBill() {
+          data = {
+            'items': bill_items,
+            'total_price': total_price
+          }
+
+          url = "{% url 'create-bill' %}"
+
+          let form = document.createElement('form');
+          form.action = url;
+          form.method = "POST";
+
+          let csrfTokenInput = document.createElement('input');
+          csrfTokenInput.type = 'hidden';
+          csrfTokenInput.name = 'csrfmiddlewaretoken';
+          csrfTokenInput.value = "{{ csrf_token }}"; // Use Django's template tag to insert the CSRF token
+
+          let dataInput = document.createElement('input');
+          dataInput.type = 'hidden';
+          dataInput.name = 'data';
+          dataInput.value = JSON.stringify(data);
+
+          form.appendChild(csrfTokenInput);
+          form.appendChild(dataInput);
+
+          document.body.appendChild(form);
+          form.submit();
         }
     </script>
 {% endblock %}

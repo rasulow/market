@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Category(models.Model):
@@ -47,9 +48,11 @@ class Bill(models.Model):
     
     class Meta:
         db_table = 'bill'
+        verbose_name = 'Çek'
+        verbose_name = 'Çekler'
 
     def __str__(self) -> str:
-        return self.total_price
+        return str(self.id)
     
     
 class BillProducts(models.Model):
@@ -60,6 +63,8 @@ class BillProducts(models.Model):
     
     class Meta:
         db_table = 'bill_products'
+        verbose_name = 'Çek element'
+        verbose_name_plural = 'Çek elementleri'
         
     def __str__(self) -> str:
-        return self.bill
+        return str(self.bill.id)

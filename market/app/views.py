@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from . import models
+import json
+from . import utils
 
 def home(request):
     search = request.GET.get('search', None)
@@ -71,11 +73,40 @@ def delete_product(request, product_id):
     product.delete()
     return redirect('home')
 
+
 def bill(request):
-    return render(request, 'bill.html')
+    bills = models.Bill.objects.all()
+    context = {
+        'bills': bills
+    }
+    return render(request, 'bill.html', context)
+
+def get_pdf(request, bill_id):
+    bill = models.Bill.objects.get(id=bill_id)
+    bill_products = models.BillProducts.objects.filter(bill__id=bill_id)
+    return utils.generate_pdf(bill, bill_products)
 
 
 def create_bill(request):
+    if request.method == 'POST':
+        data = json.loads(request.POST.get('data', None))
+        if data is None:
+            raise AttributeError
+        
+        bill = models.Bill.objects.create(total_price=data['total_price'])
+        for item in data['items']:
+            product = models.Product.objects.get(id=item['id'])
+            product.count_in_stock -= item['count']
+            product.save()
+            models.BillProducts.objects.create(
+                bill=bill,
+                product=product,
+                count=item['count'],
+                total_price=item['total_price']
+            )
+        return redirect('create-bill')
+    
+        
     products = models.Product.objects.all()
     context = {
         'products': products

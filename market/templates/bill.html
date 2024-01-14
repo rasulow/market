@@ -7,5 +7,31 @@
         <div class="w-full flex justify-end">
             <a href="{% url 'create-bill' %}" class="px-4 py-2 border border-green-600 text-green-600 flex items-center hover:bg-green-600 hover:text-white">Cek doretmek</a>
         </div>
+        <div class="container mx-auto flex py-10 flex-wrap justify-center">
+            {% for bill in bills %}
+                <div class="border border-black border-solid p-2 my-2 mr-4 space-x-2 flex w-[250px]">
+                    <div class="w-1/2">
+                        <strong class="w-full flex justify-end">ID:</strong>
+                        <strong class="w-full flex justify-end">Umumy baha:</strong>
+                        <strong class="w-full flex justify-end">Senesi:</strong>
+                        <strong class="w-full flex justify-end">Wagty:</strong>
+                        <strong class="w-full flex justify-end">PDF:</strong>
+                    </div>
+                    <div class="w-1/2">
+                        <div class="w-full flex justify-start">{{ bill.id }}</div>
+                        <div class="w-full flex justify-start">{{ bill.total_price }} TMT</div>
+                        <div class="w-full flex justify-start">{{ bill.created_at|date:"d.m.Y" }}</div>
+                        <div class="w-full flex justify-start">{{ bill.created_at|time:"H:i:s" }}</div>
+                        <div class="w-full flex justify-start items-center">
+                            <button type="submit">
+                                <a href="{% url 'get-pdf' bill_id=bill.id %}">
+                                    <img src="{% static 'icons/file.png' %}" alt="" class="w-[18px] h-[18px]">
+                                </a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
