@@ -104,7 +104,7 @@ def create_bill(request):
                 count=item['count'],
                 total_price=item['total_price']
             )
-        return redirect('create-bill')
+        return redirect('bill')
     
         
     products = models.Product.objects.all()
