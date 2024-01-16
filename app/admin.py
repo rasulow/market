@@ -1,6 +1,11 @@
 from django.contrib import admin
 from . import models
 
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'price', 'unit', 'count_in_stock', 'total_price', 'category']
+    list_filter = ['category']
+
+
 class BillAdmin(admin.ModelAdmin):
     list_display = ['id', 'total_price', 'formatted_created_at']
 
@@ -17,6 +22,6 @@ class BillProductsAdmin(admin.ModelAdmin):
     list_filter = ['bill']
 
 admin.site.register(models.Category)
-admin.site.register(models.Product)
+admin.site.register(models.Product, ProductAdmin)
 admin.site.register(models.Bill, BillAdmin)
 admin.site.register(models.BillProducts, BillProductsAdmin)
